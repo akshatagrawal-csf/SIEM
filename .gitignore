@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ML Models (large files)
+models/*.pkl
+models/*.joblib
+backend/ml/models/*.pkl
+backend/ml/models/*.joblib
+
+# Data
+data/*.csv
+data/*.db
+backend/data/raw/*.csv
+!**/.gitkeep
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+frontend/.vite/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.local
+.env.production
+*.log
+
+# Docker
+*.log
+docker-compose.override.yml
