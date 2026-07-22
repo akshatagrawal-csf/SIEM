@@ -1,23 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-primary: #0B0C10;
-  --bg-secondary: #0F1017;
-  --bg-tertiary: #13141C;
-  --bg-glass: #13141C;
-  --accent-primary: #3B82F6;
-  --severity-critical: #EF4444;
-  --severity-high: #F97316;
-  --severity-medium: #F59E0B;
-  --severity-low: #10B981;
-  --text-primary: #F9FAFB;
-  --text-secondary: #9CA3AF;
-  --text-muted: #6B7280;
-  --border-color: #1E202E;
+  --bg-primary: #111111;
+  --bg-secondary: #161616;
+  --bg-tertiary: #181818;
+  --bg-glass: #181818;
+  --accent-primary: #FF4F00;   /* International Orange */
+  --accent-secondary: #FFD400; /* Cyber Yellow */
+  --severity-critical: #FF0033; /* Crimson Red */
+  --severity-high: #FFB800;    /* Amber */
+  --severity-medium: #FFD400;  /* Cyber Yellow */
+  --severity-low: #CCFF00;     /* Electric Lime */
+  --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
+  --text-muted: #888888;
+  --border-color: #262626;
   --sidebar-width: 250px;
   --header-height: 60px;
   --radius-sm: 4px;
@@ -29,11 +30,11 @@
 @layer utilities {
   .glass-panel {
     @apply bg-siem-card border border-siem-border rounded-lg transition-all duration-200;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4);
   }
   
   .glass-panel-hover {
-    @apply hover:border-blue-500/30 hover:-translate-y-0.5 transition-all duration-200;
+    @apply hover:border-siem-orange/40 transition-all duration-200;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -49,36 +50,13 @@
 }
 
 html, body, #root, main, .main-content, aside, .sidebar, .app-layout {
-  background-color: #0B0C10 !important;
-  color: #F9FAFB;
+  background-color: #111111 !important;
+  color: #FFFFFF;
 }
 
 body {
-  @apply font-sans overflow-hidden antialiased selection:bg-blue-600/30 selection:text-blue-400;
-}
-
-/* Moving Animated Background Grid & Laser Scan Beam */
-.cyber-grid-bg {
-  background-color: #0B0C10;
-  background-image: 
-    linear-gradient(to right, rgba(30, 32, 46, 0.35) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(30, 32, 46, 0.35) 1px, transparent 1px);
-  background-size: 36px 36px;
-}
-
-.cyber-scan-beam {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.04) 50%, transparent 100%);
-  background-size: 100% 200%;
-  animation: scanBeam 10s linear infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes scanBeam {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  @apply font-sans overflow-x-hidden antialiased selection:bg-orange-600/40 selection:text-white;
+  background: linear-gradient(180deg, #111111 0%, #1A1A1A 100%) !important;
 }
 
 .glass-card {
@@ -95,26 +73,26 @@ body {
   border-radius: var(--radius-lg);
 }
 
-/* Professional Severity Badges */
+/* Operational Authority Severity Badges */
 .badge-critical, .severity-badge.critical {
-  background-color: rgba(239, 68, 68, 0.12);
-  color: #EF4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(255, 0, 51, 0.15);
+  color: #FF0033;
+  border: 1px solid rgba(255, 0, 51, 0.35);
 }
 .badge-high, .severity-badge.high {
-  background-color: rgba(249, 115, 22, 0.12);
-  color: #F97316;
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background-color: rgba(255, 184, 0, 0.15);
+  color: #FFB800;
+  border: 1px solid rgba(255, 184, 0, 0.35);
 }
 .badge-medium, .severity-badge.medium {
-  background-color: rgba(245, 158, 11, 0.12);
-  color: #F59E0B;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: rgba(255, 212, 0, 0.15);
+  color: #FFD400;
+  border: 1px solid rgba(255, 212, 0, 0.35);
 }
 .badge-low, .severity-badge.low {
-  background-color: rgba(16, 185, 129, 0.12);
-  color: #10B981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background-color: rgba(204, 255, 0, 0.15);
+  color: #CCFF00;
+  border: 1px solid rgba(204, 255, 0, 0.35);
 }
 
 .severity-badge {
@@ -126,6 +104,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* Data Table Styling */
@@ -146,6 +125,7 @@ body {
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .data-table td {
@@ -156,7 +136,7 @@ body {
 }
 
 .data-table tr:hover td {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 79, 0, 0.04);
 }
 
 /* React Flow Clean Overrides */

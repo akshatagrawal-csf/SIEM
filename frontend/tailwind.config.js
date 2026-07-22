@@ -5,33 +5,38 @@ export default {
     extend: {
       colors: {
         siem: {
-          bg: '#0B0C10',
-          secondary: '#0F1017',
-          card: '#13141C',
-          border: '#1E202E',
-          hover: '#1B1D2A',
-          cyan: '#3B82F6',       /* Enterprise Blue Accent */
-          emerald: '#10B981',    /* Enterprise Emerald */
-          purple: '#6366F1',     /* Enterprise Indigo */
-          green: '#10B981',      /* Success Green */
-          orange: '#F97316',     /* High Risk Orange */
-          critical: '#EF4444',   /* Critical Red */
-          high: '#F97316',       /* High Orange */
-          medium: '#F59E0B',     /* Medium Amber */
-          low: '#10B981',        /* Low Green */
-          text: '#F9FAFB',
-          secondaryText: '#9CA3AF',
-          muted: '#6B7280',
+          bg: '#111111',
+          bgSecondary: '#161616',
+          bgGradientFrom: '#111111',
+          bgGradientTo: '#1A1A1A',
+          card: '#181818',
+          border: '#2A2A2A',
+          hover: '#222222',
+          orange: '#FF4F00',     /* Primary Accent: International Orange */
+          yellow: '#FFD400',     /* Secondary Accent: Cyber Yellow */
+          cyan: '#FF4F00',       /* Override legacy cyan references with Orange */
+          emerald: '#CCFF00',    /* Electric Lime for Secure/Resolved */
+          green: '#CCFF00',      /* Electric Lime */
+          crimson: '#FF0033',    /* Critical Crimson Red */
+          amber: '#FFB800',      /* High Amber */
+          critical: '#FF0033',   /* Crimson Red */
+          high: '#FFB800',       /* Amber */
+          medium: '#FFD400',     /* Cyber Yellow */
+          low: '#CCFF00',        /* Electric Lime */
+          text: '#FFFFFF',
+          secondaryText: '#CCCCCC',
+          muted: '#888888',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'Satoshi', 'sans-serif'],
         display: ['Inter', 'sans-serif'],
-        mono: ['Fira Code', 'monospace'],
+        mono: ['JetBrains Mono', 'Space Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2)',
-        'panel': '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3)',
+        'card': '0 2px 8px 0 rgba(0, 0, 0, 0.4)',
+        'orange': '0 0 20px rgba(255, 79, 0, 0.35)',
+        'yellow': '0 0 20px rgba(255, 212, 0, 0.25)',
       },
     },
   },
