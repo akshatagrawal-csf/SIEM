@@ -1,43 +1,65 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, ShieldAlert, Cpu, Radio } from 'lucide-react';
+import { Bell, Search, ShieldAlert, Radio, X, CheckCircle2 } from 'lucide-react';
 import { useSiemStore } from '../../store/useSiemStore';
 
 export const Header = () => {
   const { activeThreats } = useSiemStore();
   const [time, setTime] = useState(new Date());
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(3);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const sampleNotifications = [
+    { id: 1, text: "Critical: Brute force attack from 45.33.32.156", time: "2m ago", severe: true },
+    { id: 2, text: "Warning: Data exfiltration threshold exceeded on 192.168.1.50", time: "15m ago", severe: true },
+    { id: 3, text: "Notice: ISO-27001 compliance audit report generated", time: "1h ago", severe: false },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+    setUnreadCount(0);
+  };
+
   return (
-    <header className="flex items-center justify-between h-20 px-8 bg-siem-secondary/70 backdrop-blur-xl border-b border-siem-border z-30 shrink-0 select-none">
+    <header className="flex items-center justify-between h-16 px-6 bg-siem-secondary border-b border-siem-border z-30 shrink-0 select-none">
       {/* Search Input Bar */}
       <div className="relative w-72 md:w-96">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-siem-muted" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-siem-muted" />
         <input
           type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search IP, Hash, User, or Event..."
-          className="w-full pl-10 pr-4 py-2 text-xs font-mono bg-siem-bg/50 border border-siem-border rounded-xl text-white placeholder-siem-muted focus:outline-none focus:border-siem-cyan/50 focus:ring-1 focus:ring-siem-cyan/50 transition-all"
+          className="w-full pl-9 pr-8 py-1.5 text-xs font-mono bg-siem-bg border border-siem-border rounded-md text-white placeholder-siem-muted focus:outline-none focus:border-blue-500 transition-colors"
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-siem-muted border border-siem-border px-1.5 py-0.5 rounded-md">
-          ⌘K
-        </span>
+        {searchQuery ? (
+          <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-siem-muted hover:text-white">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-siem-muted border border-siem-border px-1 rounded">
+            ⌘K
+          </span>
+        )}
       </div>
 
       {/* Action Indicators & Time */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4 relative">
         {/* Live Event Stream Indicator */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-siem-cyan/10 border border-siem-cyan/20">
-          <Radio className="w-3.5 h-3.5 text-siem-cyan animate-pulse" />
-          <span className="text-xs font-mono font-medium text-siem-cyan">LIVE STREAM</span>
+        <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded bg-blue-500/10 border border-blue-500/20">
+          <Radio className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+          <span className="text-[11px] font-mono font-medium text-blue-400">REALTIME STREAM</span>
         </div>
 
         {/* Threat Alert Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-siem-critical/10 border border-siem-critical/30 shadow-glow-critical">
-          <ShieldAlert className="w-4 h-4 text-siem-critical animate-bounce" />
-          <span className="text-xs font-mono font-bold text-siem-critical">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-red-500/10 border border-red-500/30">
+          <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+          <span className="text-[11px] font-mono font-bold text-red-400">
             {activeThreats} THREATS
           </span>
         </div>
@@ -48,11 +70,42 @@ export const Header = () => {
           <span className="text-[10px] text-siem-muted">{time.toLocaleDateString()}</span>
         </div>
 
-        {/* Notifications */}
-        <button className="relative p-2.5 rounded-xl bg-siem-bg/50 border border-siem-border text-siem-secondaryText hover:text-white hover:border-siem-cyan/40 transition-all">
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-siem-cyan shadow-glow-cyan" />
-        </button>
+        {/* Notifications Button & Dropdown */}
+        <div className="relative">
+          <button 
+            onClick={handleNotificationClick}
+            className="relative p-2 rounded-md bg-siem-bg border border-siem-border text-siem-secondaryText hover:text-white hover:border-siem-muted/40 transition-colors"
+          >
+            <Bell className="w-4 h-4" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
+            )}
+          </button>
+
+          {/* Notification Popup Drawer */}
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-80 bg-siem-card border border-siem-border rounded-lg shadow-xl p-4 z-50">
+              <div className="flex justify-between items-center mb-3 pb-2 border-b border-siem-border">
+                <h4 className="text-xs font-semibold text-white">System Notifications</h4>
+                <button onClick={() => setShowNotifications(false)} className="text-siem-muted hover:text-white">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar">
+                {sampleNotifications.map(n => (
+                  <div key={n.id} className="p-2.5 rounded bg-siem-secondary border border-siem-border text-xs space-y-1">
+                    <div className="flex justify-between items-start">
+                      <span className={`font-medium text-[11px] ${n.severe ? 'text-red-400' : 'text-emerald-400'}`}>
+                        {n.text}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-siem-muted">{n.time}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

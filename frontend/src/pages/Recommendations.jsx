@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldAlert, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Clock, AlertTriangle, CheckCircle, RefreshCw, Play, Check, X } from 'lucide-react';
 import { api } from '../services/api';
 import SeverityBadge from '../components/SeverityBadge';
 import RiskGauge from '../components/RiskGauge';
@@ -9,6 +9,7 @@ export default function Recommendations() {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,10 +25,18 @@ export default function Recommendations() {
     fetchData();
   }, []);
 
+  const handleAction = (id, newStatus, actionName) => {
+    setRecommendations(prev =>
+      prev.map(item => (item.id === id ? { ...item, status: newStatus } : item))
+    );
+    setToastMessage(`[SUCCESS] ${actionName} executed for recommendation #${id}`);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <RefreshCw className="w-8 h-8 text-siem-cyan animate-spin" />
+        <RefreshCw className="w-6 h-6 text-blue-500 animate-spin" />
       </div>
     );
   }
@@ -53,62 +62,67 @@ export default function Recommendations() {
 
   const getEscalationBadge = (level) => {
     switch(level) {
-      case 'Monitor': return 'bg-siem-green/15 text-siem-green border-siem-green/30';
-      case 'Investigate': return 'bg-siem-medium/15 text-siem-medium border-siem-medium/30';
-      case 'Escalate': return 'bg-siem-orange/15 text-siem-orange border-siem-orange/30';
-      case 'Isolate': return 'bg-siem-critical/15 text-siem-critical border-siem-critical/30 shadow-glow-critical';
-      default: return 'bg-siem-hover text-siem-muted border-siem-border';
+      case 'Monitor': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'Investigate': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'Escalate': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+      case 'Isolate': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      default: return 'bg-siem-card text-siem-muted border-siem-border';
     }
   };
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'pending': return 'text-siem-medium';
-      case 'in_progress': return 'text-siem-cyan';
-      case 'completed': return 'text-siem-green';
+      case 'pending': return 'text-amber-400';
+      case 'in_progress': return 'text-blue-400';
+      case 'completed': return 'text-emerald-400';
       case 'dismissed': return 'text-siem-muted';
       default: return 'text-siem-muted';
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <header className="flex justify-between items-center">
         <div>
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-3xl font-display font-semibold text-white flex items-center gap-3"
-          >
-            <span className="w-2.5 h-8 bg-siem-cyan rounded-full animate-pulse shadow-glow-cyan" />
+          <h1 className="text-2xl font-semibold text-white tracking-tight">
             Automated Incident Response & Guidance
-          </motion.h1>
-          <p className="text-xs font-mono text-siem-muted mt-1.5 ml-5">
-            AI-driven threat mitigation Playbooks & SOC analyst escalation guidelines
+          </h1>
+          <p className="text-xs text-siem-muted mt-1">
+            AI-driven threat mitigation playbooks & SOC analyst response actions
           </p>
         </div>
       </header>
 
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono rounded-lg flex items-center justify-between">
+          <span>{toastMessage}</span>
+          <button onClick={() => setToastMessage('')} className="text-emerald-400 hover:text-white">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { title: "Total Flagged Incidents", value: totalIncidents, icon: ShieldAlert, color: "text-siem-cyan" },
-          { title: "Pending Response Actions", value: pendingCount, icon: Clock, color: "text-siem-medium" },
-          { title: "Critical Isolations Required", value: criticalEscalations, icon: AlertTriangle, color: "text-siem-critical" },
-          { title: "Successfully Mitigated", value: resolvedCount, icon: CheckCircle, color: "text-siem-green" }
+          { title: "Total Flagged Incidents", value: totalIncidents, icon: ShieldAlert, color: "text-blue-400" },
+          { title: "Pending Response Actions", value: pendingCount, icon: Clock, color: "text-amber-400" },
+          { title: "Critical Isolations Required", value: criticalEscalations, icon: AlertTriangle, color: "text-red-400" },
+          { title: "Successfully Mitigated", value: resolvedCount, icon: CheckCircle, color: "text-emerald-400" }
         ].map((kpi, i) => (
-          <motion.div key={i} whileHover={{ y: -4, scale: 1.01 }} className="glass-panel p-6">
+          <div key={i} className="glass-panel p-5 rounded-lg border border-siem-border bg-siem-card">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-siem-muted text-xs font-mono uppercase tracking-wider">{kpi.title}</p>
-                <h3 className="text-2xl font-display font-bold text-white mt-2">{kpi.value}</h3>
+                <p className="text-siem-muted text-xs font-medium uppercase tracking-wide">{kpi.title}</p>
+                <h3 className="text-2xl font-bold text-white mt-1.5">{kpi.value}</h3>
               </div>
-              <div className="p-3 rounded-xl bg-siem-bg/50 border border-siem-border">
-                <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
+              <div className="p-2.5 rounded-md bg-siem-secondary border border-siem-border">
+                <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -118,10 +132,10 @@ export default function Recommendations() {
           <button
             key={tab.id}
             onClick={() => setActiveFilter(tab.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-mono transition-all duration-200 border ${
+            className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors border ${
               activeFilter === tab.id
-                ? 'bg-siem-cyan/15 text-siem-cyan border-siem-cyan/40 shadow-glow-cyan font-bold'
-                : 'bg-siem-bg/40 text-siem-secondaryText border-siem-border hover:bg-siem-hover hover:text-white'
+                ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 font-semibold'
+                : 'bg-siem-card text-siem-secondaryText border-siem-border hover:bg-siem-hover hover:text-white'
             }`}
           >
             {tab.label}
@@ -131,52 +145,74 @@ export default function Recommendations() {
 
       {/* Recommendation Cards List */}
       <div className="space-y-4">
-        {sortedAndFiltered.map((rec, index) => (
-          <motion.div
+        {sortedAndFiltered.map((rec) => (
+          <div
             key={rec.id}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.04 }}
-            className="glass-panel glass-panel-hover p-6 flex flex-col md:flex-row items-start md:items-center gap-6"
+            className="glass-panel p-5 flex flex-col md:flex-row items-start md:items-center gap-5 border border-siem-border bg-siem-card rounded-lg"
           >
             {/* Risk Gauge */}
             <div className="shrink-0 w-24">
-              <RiskGauge score={rec.risk_score} size={85} />
+              <RiskGauge score={rec.risk_score} size={80} />
             </div>
 
             {/* Incident Details */}
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-3">
-                <h3 className="font-display font-bold text-base text-white">{rec.attack_type}</h3>
+                <h3 className="font-bold text-base text-white">{rec.attack_type}</h3>
                 <SeverityBadge severity={rec.severity} />
               </div>
               <div className="font-mono text-xs text-siem-muted space-x-2">
-                <span className="text-siem-cyan">{rec.source_ip}</span>
+                <span className="text-blue-400">{rec.source_ip}</span>
                 <span>•</span>
                 <span className="text-white">{rec.username}</span>
               </div>
-              <div className="text-xs font-mono text-siem-secondaryText">
-                <span className="text-siem-muted">Trigger Reason:</span> {rec.reason}
+              <div className="text-xs text-siem-secondaryText">
+                <span className="text-siem-muted font-medium">Trigger Reason:</span> {rec.reason}
               </div>
-              <div className="text-xs font-mono font-semibold text-white bg-siem-bg/50 p-2.5 rounded-xl border border-siem-border">
-                <span className="text-siem-cyan uppercase tracking-wide mr-2">Recommended Action:</span>
+              <div className="text-xs font-semibold text-white bg-siem-secondary p-2.5 rounded-md border border-siem-border">
+                <span className="text-blue-400 uppercase tracking-wide mr-2">Recommended Action:</span>
                 {rec.recommendation}
               </div>
             </div>
 
-            {/* Status & Escalation Level */}
-            <div className="shrink-0 flex flex-col items-start md:items-end gap-2.5">
-              <span className={`px-3 py-1 rounded-xl text-xs font-mono font-bold border ${getEscalationBadge(rec.escalation_level)}`}>
-                {rec.escalation_level}
-              </span>
-              <span className={`text-xs font-mono font-bold capitalize ${getStatusColor(rec.status)}`}>
-                Status: {rec.status.replace('_', ' ')}
-              </span>
+            {/* Status, Escalation Level & Action Buttons */}
+            <div className="shrink-0 flex flex-col items-start md:items-end gap-3 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-siem-border">
+              <div className="flex items-center gap-2">
+                <span className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border ${getEscalationBadge(rec.escalation_level)}`}>
+                  {rec.escalation_level}
+                </span>
+                <span className={`text-xs font-semibold capitalize ${getStatusColor(rec.status)}`}>
+                  {rec.status.replace('_', ' ')}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                {rec.status !== 'completed' && (
+                  <button
+                    onClick={() => handleAction(rec.id, 'completed', 'Mitigation')}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Execute Mitigation</span>
+                  </button>
+                )}
+                {rec.status !== 'dismissed' && (
+                  <button
+                    onClick={() => handleAction(rec.id, 'dismissed', 'Dismiss Incident')}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-siem-secondary text-siem-muted border border-siem-border hover:text-white transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Dismiss</span>
+                  </button>
+                )}
+              </div>
+
               <span className="text-[10px] font-mono text-siem-muted">
                 {new Date(rec.timestamp).toLocaleString()}
               </span>
             </div>
-          </motion.div>
+          </div>
         ))}
 
         {sortedAndFiltered.length === 0 && (
