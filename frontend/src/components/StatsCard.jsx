@@ -2,7 +2,8 @@ import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const StatsCard = ({ title, value, icon: Icon, change, changeLabel, color }) => {
-  const isPositiveChange = change >= 0;
+  const hasChange = change !== undefined && change !== null;
+  const isPositiveChange = hasChange && Number(change) >= 0;
   
   return (
     <div className="stat-card glass-card">
@@ -15,12 +16,14 @@ const StatsCard = ({ title, value, icon: Icon, change, changeLabel, color }) => 
             borderRadius: 'var(--radius-lg)'
           }}
         >
-          <Icon size={24} style={{ color: color }} />
+          {Icon && <Icon size={24} style={{ color: color }} />}
         </div>
-        <div className={`change-indicator ${isPositiveChange ? 'positive' : 'negative'}`} style={{ display: 'flex', alignItems: 'center', color: isPositiveChange ? 'var(--severity-low)' : 'var(--severity-critical)' }}>
-          {isPositiveChange ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-          <span style={{ marginLeft: '4px', fontWeight: 'bold' }}>{Math.abs(change)}%</span>
-        </div>
+        {hasChange && (
+          <div className={`change-indicator ${isPositiveChange ? 'positive' : 'negative'}`} style={{ display: 'flex', alignItems: 'center', color: isPositiveChange ? 'var(--severity-low)' : 'var(--severity-critical)' }}>
+            {isPositiveChange ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+            <span style={{ marginLeft: '4px', fontWeight: 'bold' }}>{Math.abs(Number(change))}%</span>
+          </div>
+        )}
       </div>
       <div className="stat-card-body" style={{ marginTop: '16px' }}>
         <h3 className="stat-value" style={{ fontSize: '2rem', margin: 0 }}>{value}</h3>

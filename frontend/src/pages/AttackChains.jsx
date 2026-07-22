@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Network, ShieldAlert, Activity, GitBranch } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Network, ShieldAlert, Activity, GitBranch, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
-import Header from '../components/Header';
-import StatsCard from '../components/StatsCard';
 import SeverityBadge from '../components/SeverityBadge';
 import AttackChainGraph from '../components/AttackChainGraph';
 
@@ -29,109 +28,136 @@ export default function AttackChains() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: 'var(--text-primary)', padding: '24px' }}>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-96">
+        <RefreshCw className="w-8 h-8 text-siem-cyan animate-spin" />
+      </div>
+    );
   }
 
   const totalChains = chains.length;
-  const criticalChains = chains.filter(c => c.severity === 'critical').length;
+  const criticalChains = chains.filter(c => c.severity?.toLowerCase() === 'critical').length;
   const avgRisk = chains.length > 0 ? Math.round(chains.reduce((acc, c) => acc + c.risk_score, 0) / chains.length) : 0;
   const totalStages = chains.reduce((acc, c) => acc + (c.stages ? c.stages.length : 0), 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', color: 'var(--text-primary)' }}>
-      <Header title="Attack Chain Analysis" subtitle="Multi-stage attack detection and correlation" />
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
-        <StatsCard title="Total Chains" value={totalChains} icon={Network} color="#06b6d4" />
-        <StatsCard title="Critical Chains" value={criticalChains} icon={ShieldAlert} color="#ef4444" />
-        <StatsCard title="Avg Risk Score" value={avgRisk} icon={Activity} color="#f59e0b" />
-        <StatsCard title="Total Stages" value={totalStages} icon={GitBranch} color="#8b5cf6" />
-      </div>
+    <div className="space-y-8">
+      {/* Header */}
+      <header className="flex justify-between items-center">
+        <div>
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl font-display font-semibold text-white flex items-center gap-3"
+          >
+            <span className="w-2.5 h-8 bg-siem-cyan rounded-full animate-pulse shadow-glow-cyan" />
+            Attack-Chain Correlation Visualizer
+          </motion.h1>
+          <p className="text-xs font-mono text-siem-muted mt-1.5 ml-5">
+            Multi-stage APT threat reconstruction & progression timeline
+          </p>
+        </div>
+      </header>
 
-      <div style={{ display: 'flex', gap: '24px', minHeight: '500px' }}>
-        <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '8px' }}>
-          {chains.map(chain => {
-            const isSelected = selectedChain && selectedChain.id === chain.id;
-            return (
-              <div 
-                key={chain.id}
-                onClick={() => setSelectedChain(chain)}
-                style={{
-                  backgroundColor: 'var(--bg-glass)',
-                  padding: '16px',
-                  borderRadius: 'var(--radius-lg, 16px)',
-                  border: isSelected ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  transition: 'border-color 0.2s ease'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 600 }}>{chain.name}</span>
-                  <SeverityBadge severity={chain.severity} />
-                </div>
-                <div style={{ fontFamily: 'monospace', color: 'var(--text-secondary)', fontSize: '12px' }}>
-                  {chain.source_ip} &rarr; {chain.target_system}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                  <span>Risk Score: <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>{chain.risk_score}</span></span>
-                  <span style={{ backgroundColor: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' }}>
-                    {chain.stages ? chain.stages.length : 0} stages
-                  </span>
-                </div>
+      {/* KPI Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { title: "Correlated Attack Chains", value: totalChains, icon: Network, color: "text-siem-cyan" },
+          { title: "Critical Escalations", value: criticalChains, icon: ShieldAlert, color: "text-siem-critical" },
+          { title: "Average Risk Rating", value: `${avgRisk}/100`, icon: Activity, color: "text-siem-medium" },
+          { title: "Total Attack Stages", value: totalStages, icon: GitBranch, color: "text-siem-purple" }
+        ].map((kpi, i) => (
+          <motion.div key={i} whileHover={{ y: -4, scale: 1.01 }} className="glass-panel p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-siem-muted text-xs font-mono uppercase tracking-wider">{kpi.title}</p>
+                <h3 className="text-2xl font-display font-bold text-white mt-2">{kpi.value}</h3>
               </div>
-            );
-          })}
-        </div>
-
-        <div style={{ flex: 1, backgroundColor: 'var(--bg-glass)', borderRadius: 'var(--radius-xl, 20px)', border: '1px solid var(--border-color)', padding: '24px', minHeight: '400px' }}>
-          {selectedChain ? (
-            <AttackChainGraph chain={selectedChain} />
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
-              Select an attack chain to view its graph
+              <div className="p-3 rounded-xl bg-siem-bg/50 border border-siem-border">
+                <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
+              </div>
             </div>
-          )}
-        </div>
+          </motion.div>
+        ))}
       </div>
 
-      {selectedChain && selectedChain.stages && selectedChain.stages.length > 0 && (
-        <div style={{ backgroundColor: 'var(--bg-glass)', borderRadius: 'var(--radius-xl, 20px)', border: '1px solid var(--border-color)', padding: '24px' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '18px', fontWeight: 600 }}>Attack Timeline</h3>
-          <div style={{ position: 'relative', borderLeft: '2px solid var(--border-color)', marginLeft: '12px', paddingBottom: '24px' }}>
-            {selectedChain.stages.map((stage, idx) => {
-              let dotColor = 'var(--severity-low)';
-              if (stage.severity === 'critical') dotColor = 'var(--severity-critical)';
-              else if (stage.severity === 'high') dotColor = 'var(--severity-high)';
-              else if (stage.severity === 'medium') dotColor = 'var(--severity-medium)';
-
+      {/* Main Graph & Selection Column */}
+      <div className="flex flex-col lg:flex-row gap-6 min-h-[550px]">
+        {/* Left Column: Chain Selection List */}
+        <div className="w-full lg:w-80 flex flex-col gap-3 shrink-0">
+          <h3 className="text-xs font-mono text-siem-muted uppercase tracking-wider px-1">Detected Incidents</h3>
+          <div className="space-y-3 max-h-[550px] overflow-y-auto custom-scrollbar pr-1">
+            {chains.map(chain => {
+              const isSelected = selectedChain && selectedChain.id === chain.id;
               return (
-                <div key={idx} style={{ position: 'relative', paddingLeft: '32px', marginBottom: '24px' }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: '-7px',
-                    top: '4px',
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    backgroundColor: dotColor,
-                    border: '2px solid var(--bg-primary)'
-                  }} />
-                  <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '16px', borderRadius: 'var(--radius-md, 10px)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                      <span style={{ fontWeight: 'bold' }}>{stage.type}</span>
-                      <SeverityBadge severity={stage.severity} />
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>{new Date(stage.timestamp).toLocaleString()}</div>
-                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{stage.description}</div>
+                <div
+                  key={chain.id}
+                  onClick={() => setSelectedChain(chain)}
+                  className={`glass-panel p-4 cursor-pointer transition-all duration-200 ${
+                    isSelected 
+                      ? 'border-siem-cyan bg-siem-cyan/10 shadow-glow-cyan' 
+                      : 'hover:border-siem-border/80 hover:bg-siem-hover'
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-display font-semibold text-sm text-white line-clamp-1">{chain.name}</span>
+                    <SeverityBadge severity={chain.severity} />
+                  </div>
+                  <div className="font-mono text-xs text-siem-cyan mb-2">
+                    {chain.source_ip} &rarr; {chain.target_system}
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono text-siem-muted">
+                    <span>Risk: <strong className="text-siem-cyan">{chain.risk_score}</strong></span>
+                    <span className="px-2 py-0.5 rounded-full bg-siem-bg/60 border border-siem-border text-siem-secondaryText">
+                      {chain.stages?.length || 0} stages
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
+
+        {/* Right Column: React Flow Graph Canvas */}
+        <div className="flex-1 glass-panel p-4 min-h-[450px]">
+          {selectedChain ? (
+            <AttackChainGraph chain={selectedChain} />
+          ) : (
+            <div className="flex items-center justify-center h-full font-mono text-xs text-siem-muted">
+              Select an attack chain from the left panel to inspect graph
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Stage Progression Timeline */}
+      {selectedChain && selectedChain.stages && selectedChain.stages.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
+          <h3 className="font-display font-semibold text-lg text-white mb-6">Stage Progression Timeline</h3>
+          <div className="relative border-l-2 border-siem-border ml-4 space-y-6 pb-2">
+            {selectedChain.stages.map((stage, idx) => {
+              const sev = stage.severity?.toLowerCase();
+              let dotBg = 'bg-siem-green';
+              if (sev === 'critical') dotBg = 'bg-siem-critical shadow-glow-critical';
+              else if (sev === 'high') dotBg = 'bg-siem-high';
+              else if (sev === 'medium') dotBg = 'bg-siem-medium';
+
+              return (
+                <div key={idx} className="relative pl-8 group">
+                  <div className={`absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 border-siem-bg ${dotBg}`} />
+                  <div className="glass-panel p-4 border border-siem-border group-hover:border-siem-cyan/30 transition-all">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-display font-bold text-sm text-white">{stage.type}</span>
+                      <SeverityBadge severity={stage.severity} />
+                    </div>
+                    <p className="font-mono text-xs text-siem-muted mb-2">{new Date(stage.timestamp).toLocaleString()}</p>
+                    <p className="text-xs text-siem-secondaryText font-mono">{stage.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
       )}
     </div>
   );

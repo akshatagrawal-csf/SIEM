@@ -22,6 +22,8 @@ backend/ml/models/*.joblib
 # Data
 data/*.csv
 data/*.db
+*.db
+backend/*.db
 backend/data/raw/*.csv
 !**/.gitkeep
 

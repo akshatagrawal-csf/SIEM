@@ -1,5 +1,6 @@
-import { Routes, Route } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppShell } from './components/layout/AppShell';
 import Dashboard from './pages/Dashboard';
 import EventExplorer from './pages/EventExplorer';
 import ThreatAnalytics from './pages/ThreatAnalytics';
@@ -8,22 +9,22 @@ import MLPerformance from './pages/MLPerformance';
 import Recommendations from './pages/Recommendations';
 import Compliance from './pages/Compliance';
 
-function App() {
+export default function App() {
   return (
-    <div className="app-layout">
-      <Sidebar />
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route path="/" element={<Navigate replace to="/dashboard" />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/events" element={<EventExplorer />} />
           <Route path="/threats" element={<ThreatAnalytics />} />
           <Route path="/attack-chains" element={<AttackChains />} />
           <Route path="/ml" element={<MLPerformance />} />
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/compliance" element={<Compliance />} />
-        </Routes>
-      </main>
-    </div>
+          <Route path="*" element={<Navigate replace to="/dashboard" />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
-export default App;

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ShieldAlert, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
-import Header from '../components/Header';
-import StatsCard from '../components/StatsCard';
 import SeverityBadge from '../components/SeverityBadge';
 import RiskGauge from '../components/RiskGauge';
 
@@ -26,7 +25,11 @@ export default function Recommendations() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: 'var(--text-primary)', padding: '24px' }}>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-96">
+        <RefreshCw className="w-8 h-8 text-siem-cyan animate-spin" />
+      </div>
+    );
   }
 
   const totalIncidents = recommendations.length;
@@ -35,7 +38,7 @@ export default function Recommendations() {
   const resolvedCount = recommendations.filter(r => r.status === 'completed').length;
 
   const tabs = [
-    { id: 'all', label: 'All' },
+    { id: 'all', label: 'All Actions' },
     { id: 'pending', label: 'Pending' },
     { id: 'in_progress', label: 'In Progress' },
     { id: 'completed', label: 'Completed' },
@@ -48,121 +51,137 @@ export default function Recommendations() {
   
   const sortedAndFiltered = [...filtered].sort((a, b) => b.risk_score - a.risk_score);
 
-  const getEscalationStyle = (level) => {
+  const getEscalationBadge = (level) => {
     switch(level) {
-      case 'Monitor': return { backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' };
-      case 'Investigate': return { backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)' };
-      case 'Escalate': return { backgroundColor: 'rgba(249, 115, 22, 0.1)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.2)' };
-      case 'Isolate': return { backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' };
-      default: return { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' };
+      case 'Monitor': return 'bg-siem-green/15 text-siem-green border-siem-green/30';
+      case 'Investigate': return 'bg-siem-medium/15 text-siem-medium border-siem-medium/30';
+      case 'Escalate': return 'bg-siem-orange/15 text-siem-orange border-siem-orange/30';
+      case 'Isolate': return 'bg-siem-critical/15 text-siem-critical border-siem-critical/30 shadow-glow-critical';
+      default: return 'bg-siem-hover text-siem-muted border-siem-border';
     }
   };
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'pending': return '#f59e0b';
-      case 'in_progress': return '#06b6d4';
-      case 'completed': return '#10b981';
-      case 'dismissed': return '#94a3b8';
-      default: return '#94a3b8';
+      case 'pending': return 'text-siem-medium';
+      case 'in_progress': return 'text-siem-cyan';
+      case 'completed': return 'text-siem-green';
+      case 'dismissed': return 'text-siem-muted';
+      default: return 'text-siem-muted';
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', color: 'var(--text-primary)' }}>
-      <Header title="Incident Recommendations" subtitle="AI-powered incident response and escalation guidance" />
+    <div className="space-y-8">
+      {/* Header */}
+      <header className="flex justify-between items-center">
+        <div>
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl font-display font-semibold text-white flex items-center gap-3"
+          >
+            <span className="w-2.5 h-8 bg-siem-cyan rounded-full animate-pulse shadow-glow-cyan" />
+            Automated Incident Response & Guidance
+          </motion.h1>
+          <p className="text-xs font-mono text-siem-muted mt-1.5 ml-5">
+            AI-driven threat mitigation Playbooks & SOC analyst escalation guidelines
+          </p>
+        </div>
+      </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
-        <StatsCard title="Total Incidents" value={totalIncidents} icon={ShieldAlert} color="#06b6d4" />
-        <StatsCard title="Pending" value={pendingCount} icon={Clock} color="#f59e0b" />
-        <StatsCard title="Critical Escalations" value={criticalEscalations} icon={AlertTriangle} color="#ef4444" />
-        <StatsCard title="Resolved" value={resolvedCount} icon={CheckCircle} color="#10b981" />
+      {/* KPI Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { title: "Total Flagged Incidents", value: totalIncidents, icon: ShieldAlert, color: "text-siem-cyan" },
+          { title: "Pending Response Actions", value: pendingCount, icon: Clock, color: "text-siem-medium" },
+          { title: "Critical Isolations Required", value: criticalEscalations, icon: AlertTriangle, color: "text-siem-critical" },
+          { title: "Successfully Mitigated", value: resolvedCount, icon: CheckCircle, color: "text-siem-green" }
+        ].map((kpi, i) => (
+          <motion.div key={i} whileHover={{ y: -4, scale: 1.01 }} className="glass-panel p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-siem-muted text-xs font-mono uppercase tracking-wider">{kpi.title}</p>
+                <h3 className="text-2xl font-display font-bold text-white mt-2">{kpi.value}</h3>
+              </div>
+              <div className="p-3 rounded-xl bg-siem-bg/50 border border-siem-border">
+                <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+      {/* Filter Tabs */}
+      <div className="flex gap-2 flex-wrap">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveFilter(tab.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 'var(--radius-md, 8px)',
-              border: activeFilter === tab.id ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-              backgroundColor: activeFilter === tab.id ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
-              color: activeFilter === tab.id ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontWeight: activeFilter === tab.id ? 600 : 400,
-              transition: 'all 0.2s'
-            }}
+            className={`px-4 py-2 rounded-xl text-xs font-mono transition-all duration-200 border ${
+              activeFilter === tab.id
+                ? 'bg-siem-cyan/15 text-siem-cyan border-siem-cyan/40 shadow-glow-cyan font-bold'
+                : 'bg-siem-bg/40 text-siem-secondaryText border-siem-border hover:bg-siem-hover hover:text-white'
+            }`}
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {sortedAndFiltered.map(rec => (
-          <div key={rec.id} style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '24px',
-            backgroundColor: 'var(--bg-glass)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-lg, 16px)',
-            padding: '24px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ flexShrink: 0, width: '90px' }}>
-              <RiskGauge score={rec.risk_score} size={90} />
+      {/* Recommendation Cards List */}
+      <div className="space-y-4">
+        {sortedAndFiltered.map((rec, index) => (
+          <motion.div
+            key={rec.id}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04 }}
+            className="glass-panel glass-panel-hover p-6 flex flex-col md:flex-row items-start md:items-center gap-6"
+          >
+            {/* Risk Gauge */}
+            <div className="shrink-0 w-24">
+              <RiskGauge score={rec.risk_score} size={85} />
             </div>
 
-            <div style={{ flex: 1, minWidth: '250px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{rec.attack_type}</span>
+            {/* Incident Details */}
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-3">
+                <h3 className="font-display font-bold text-base text-white">{rec.attack_type}</h3>
                 <SeverityBadge severity={rec.severity} />
               </div>
-              <div style={{ fontSize: '13px' }}>
-                <span style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{rec.source_ip}</span>
-                <span style={{ color: 'var(--text-muted)', margin: '0 8px' }}>•</span>
-                <span style={{ color: 'var(--text-secondary)' }}>{rec.username}</span>
+              <div className="font-mono text-xs text-siem-muted space-x-2">
+                <span className="text-siem-cyan">{rec.source_ip}</span>
+                <span>•</span>
+                <span className="text-white">{rec.username}</span>
               </div>
-              <div style={{ fontSize: '14px', marginTop: '4px' }}>
-                <span style={{ color: 'var(--text-muted)', marginRight: '6px' }}>Reason:</span>
-                <span style={{ color: 'var(--text-secondary)' }}>{rec.reason}</span>
+              <div className="text-xs font-mono text-siem-secondaryText">
+                <span className="text-siem-muted">Trigger Reason:</span> {rec.reason}
               </div>
-              <div style={{ fontSize: '14px' }}>
-                <span style={{ color: 'var(--text-muted)', marginRight: '6px' }}>Action:</span>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{rec.recommendation}</span>
+              <div className="text-xs font-mono font-semibold text-white bg-siem-bg/50 p-2.5 rounded-xl border border-siem-border">
+                <span className="text-siem-cyan uppercase tracking-wide mr-2">Recommended Action:</span>
+                {rec.recommendation}
               </div>
             </div>
 
-            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-              <span style={{
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: 600,
-                ...getEscalationStyle(rec.escalation_level)
-              }}>
+            {/* Status & Escalation Level */}
+            <div className="shrink-0 flex flex-col items-start md:items-end gap-2.5">
+              <span className={`px-3 py-1 rounded-xl text-xs font-mono font-bold border ${getEscalationBadge(rec.escalation_level)}`}>
                 {rec.escalation_level}
               </span>
-              <span style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: getStatusColor(rec.status),
-                textTransform: 'capitalize'
-              }}>
-                {rec.status.replace('_', ' ')}
+              <span className={`text-xs font-mono font-bold capitalize ${getStatusColor(rec.status)}`}>
+                Status: {rec.status.replace('_', ' ')}
               </span>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+              <span className="text-[10px] font-mono text-siem-muted">
                 {new Date(rec.timestamp).toLocaleString()}
               </span>
             </div>
-          </div>
+          </motion.div>
         ))}
+
         {sortedAndFiltered.length === 0 && (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', backgroundColor: 'var(--bg-glass)', borderRadius: 'var(--radius-lg, 16px)' }}>
-            No recommendations found for this filter.
+          <div className="glass-panel p-12 text-center text-xs font-mono text-siem-muted">
+            No recommendations match the selected filter.
           </div>
         )}
       </div>

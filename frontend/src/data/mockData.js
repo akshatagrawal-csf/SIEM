@@ -147,9 +147,9 @@ export const mockAttackChains = [
 
 export const mockMLPerformance = {
   models: [
-    { name: 'Random Forest', accuracy: 0.943, precision: 0.921, recall: 0.967, f1: 0.944, color: '#06b6d4' },
-    { name: 'Decision Tree', accuracy: 0.882, precision: 0.854, recall: 0.901, f1: 0.877, color: '#8b5cf6' },
-    { name: 'Logistic Regression', accuracy: 0.824, precision: 0.798, recall: 0.841, f1: 0.819, color: '#f59e0b' }
+    { name: 'Random Forest', accuracy: 0.943, precision: 0.921, recall: 0.967, f1: 0.944, color: '#FFB800' },
+    { name: 'Decision Tree', accuracy: 0.882, precision: 0.854, recall: 0.901, f1: 0.877, color: '#00FF9D' },
+    { name: 'Logistic Regression', accuracy: 0.824, precision: 0.798, recall: 0.841, f1: 0.819, color: '#FF7700' }
   ],
   confusionMatrix: {
     labels: ['Normal', 'Brute Force', 'Port Scan', 'Malware', 'Data Exfil', 'Suspicious Login', 'Priv Escalation'],

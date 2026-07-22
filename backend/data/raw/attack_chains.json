@@ -1,0 +1,219 @@
+[
+  {
+    "id": 1,
+    "name": "APT - Internal Server Compromise",
+    "source_ip": "45.33.32.156",
+    "target_system": "192.168.1.50",
+    "username": "svc_backup",
+    "start_time": "2026-07-20 11:36:34",
+    "end_time": "2026-07-20 21:36:34",
+    "severity": "Critical",
+    "risk_score": 95,
+    "status": "active",
+    "stages": [
+      {
+        "stage_number": 1,
+        "attack_type": "Port Scan",
+        "timestamp": "2026-07-20 12:27:29",
+        "description": "Reconnaissance scan on ports 1-1024",
+        "severity": "Low"
+      },
+      {
+        "stage_number": 2,
+        "attack_type": "Brute Force",
+        "timestamp": "2026-07-20 14:36:02",
+        "description": "47 failed SSH login attempts on svc_backup",
+        "severity": "High"
+      },
+      {
+        "stage_number": 3,
+        "attack_type": "Suspicious Login",
+        "timestamp": "2026-07-20 16:04:18",
+        "description": "Successful login from external IP at 02:30 UTC",
+        "severity": "High"
+      },
+      {
+        "stage_number": 4,
+        "attack_type": "Privilege Escalation",
+        "timestamp": "2026-07-20 17:50:23",
+        "description": "svc_backup elevated to root via sudo exploit",
+        "severity": "Critical"
+      },
+      {
+        "stage_number": 5,
+        "attack_type": "Data Exfiltration",
+        "timestamp": "2026-07-20 19:59:02",
+        "description": "2.3GB transferred to 45.33.32.156 over HTTPS",
+        "severity": "Critical"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Lateral Movement - Finance Department",
+    "source_ip": "103.224.182.250",
+    "target_system": "10.0.2.10",
+    "username": "john.doe",
+    "start_time": "2026-07-19 06:36:34",
+    "end_time": "2026-07-19 14:36:34",
+    "severity": "High",
+    "risk_score": 82,
+    "status": "active",
+    "stages": [
+      {
+        "stage_number": 1,
+        "attack_type": "Suspicious Login",
+        "timestamp": "2026-07-19 06:53:28",
+        "description": "Login from unrecognized country (CN)",
+        "severity": "Medium"
+      },
+      {
+        "stage_number": 2,
+        "attack_type": "Port Scan",
+        "timestamp": "2026-07-19 09:08:59",
+        "description": "Internal network scan from john.doe workstation",
+        "severity": "Medium"
+      },
+      {
+        "stage_number": 3,
+        "attack_type": "Privilege Escalation",
+        "timestamp": "2026-07-19 10:37:59",
+        "description": "Attempted access to finance share with stolen creds",
+        "severity": "High"
+      },
+      {
+        "stage_number": 4,
+        "attack_type": "Data Exfiltration",
+        "timestamp": "2026-07-19 12:48:14",
+        "description": "800MB zip file uploaded to cloud storage",
+        "severity": "High"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Ransomware Deployment Attempt",
+    "source_ip": "185.220.101.33",
+    "target_system": "10.0.1.45",
+    "username": "admin",
+    "start_time": "2026-07-17 11:36:34",
+    "end_time": "2026-07-17 21:36:34",
+    "severity": "Critical",
+    "risk_score": 98,
+    "status": "resolved",
+    "stages": [
+      {
+        "stage_number": 1,
+        "attack_type": "Brute Force",
+        "timestamp": "2026-07-17 11:44:41",
+        "description": "122 RDP login attempts against admin account",
+        "severity": "High"
+      },
+      {
+        "stage_number": 2,
+        "attack_type": "Suspicious Login",
+        "timestamp": "2026-07-17 14:30:50",
+        "description": "Admin login from TOR exit node at 03:15 UTC",
+        "severity": "Critical"
+      },
+      {
+        "stage_number": 3,
+        "attack_type": "Malware",
+        "timestamp": "2026-07-17 16:15:11",
+        "description": "Connection to known C2 server on port 4444",
+        "severity": "Critical"
+      },
+      {
+        "stage_number": 4,
+        "attack_type": "Privilege Escalation",
+        "timestamp": "2026-07-17 18:31:13",
+        "description": "Disabled Windows Defender via PowerShell",
+        "severity": "Critical"
+      },
+      {
+        "stage_number": 5,
+        "attack_type": "Malware",
+        "timestamp": "2026-07-17 20:23:31",
+        "description": "Ransomware payload deployed to network shares",
+        "severity": "Critical"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Insider Threat - Database Exfiltration",
+    "source_ip": "10.0.3.77",
+    "target_system": "172.16.2.100",
+    "username": "db_admin",
+    "start_time": "2026-07-15 01:36:34",
+    "end_time": "2026-07-15 07:36:34",
+    "severity": "High",
+    "risk_score": 78,
+    "status": "resolved",
+    "stages": [
+      {
+        "stage_number": 1,
+        "attack_type": "Suspicious Login",
+        "timestamp": "2026-07-15 01:38:10",
+        "description": "db_admin login at 23:45 outside business hours",
+        "severity": "Medium"
+      },
+      {
+        "stage_number": 2,
+        "attack_type": "Privilege Escalation",
+        "timestamp": "2026-07-15 04:17:46",
+        "description": "Granted self DBA role on production database",
+        "severity": "High"
+      },
+      {
+        "stage_number": 3,
+        "attack_type": "Data Exfiltration",
+        "timestamp": "2026-07-15 06:03:45",
+        "description": "Full customer table exported (1.2M records)",
+        "severity": "High"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Supply Chain - CI/CD Pipeline Compromise",
+    "source_ip": "91.219.237.229",
+    "target_system": "10.0.5.100",
+    "username": "jenkins_ci",
+    "start_time": "2026-07-14 05:36:34",
+    "end_time": "2026-07-14 13:36:34",
+    "severity": "Critical",
+    "risk_score": 91,
+    "status": "contained",
+    "stages": [
+      {
+        "stage_number": 1,
+        "attack_type": "Brute Force",
+        "timestamp": "2026-07-14 05:58:46",
+        "description": "Credential stuffing against Jenkins API",
+        "severity": "Medium"
+      },
+      {
+        "stage_number": 2,
+        "attack_type": "Suspicious Login",
+        "timestamp": "2026-07-14 07:59:59",
+        "description": "jenkins_ci API token used from external IP",
+        "severity": "High"
+      },
+      {
+        "stage_number": 3,
+        "attack_type": "Malware",
+        "timestamp": "2026-07-14 10:16:05",
+        "description": "Malicious build step injected into pipeline",
+        "severity": "Critical"
+      },
+      {
+        "stage_number": 4,
+        "attack_type": "Data Exfiltration",
+        "timestamp": "2026-07-14 12:00:15",
+        "description": "Source code and secrets exfiltrated",
+        "severity": "Critical"
+      }
+    ]
+  }
+]

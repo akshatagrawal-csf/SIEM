@@ -8,9 +8,9 @@ const apiClient = axios.create({ baseURL: API_BASE, timeout: 5000 });
 
 export const api = {
   getEvents: async (filters = {}) => {
-    if (USE_MOCK) return { events: mockData.mockEvents, stats: mockData.getEventStats() };
+    if (USE_MOCK) return mockData.mockEvents;
     const res = await apiClient.get('/events', { params: filters });
-    return res.data;
+    return Array.isArray(res.data) ? res.data : (res.data?.events || []);
   },
   getThreats: async () => {
     if (USE_MOCK) return {

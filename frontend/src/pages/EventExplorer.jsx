@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import Header from '../components/Header';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Search, Filter, RefreshCw, Shield, AlertTriangle } from 'lucide-react';
+import { api } from '../services/api';
 import DataTable from '../components/DataTable';
 import SeverityBadge from '../components/SeverityBadge';
-import { api } from '../services/api';
-import { Search, Filter } from 'lucide-react';
 
 export default function EventExplorer() {
   const [events, setEvents] = useState([]);
@@ -40,10 +40,10 @@ export default function EventExplorer() {
   });
 
   const getRiskScoreStyle = (score) => {
-    let color = '#10b981';
-    if (score > 80) color = '#ef4444';
-    else if (score > 60) color = '#f97316';
-    else if (score > 30) color = '#f59e0b';
+    let color = '#10B981';
+    if (score > 80) color = '#EF4444';
+    else if (score > 60) color = '#F97316';
+    else if (score > 30) color = '#FACC15';
     return { color, fontWeight: 'bold' };
   };
 
@@ -51,65 +51,98 @@ export default function EventExplorer() {
     { 
       key: 'timestamp', 
       label: 'Timestamp', 
-      render: (val) => new Date(val).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+      render: (val) => (
+        <span className="font-mono text-xs text-siem-secondaryText">
+          {new Date(val).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+        </span>
+      )
     },
-    { key: 'source_ip', label: 'Source IP', render: (val) => <span style={{ fontFamily: 'monospace' }}>{val}</span> },
-    { key: 'destination_ip', label: 'Dest IP', render: (val) => <span style={{ fontFamily: 'monospace' }}>{val}</span> },
-    { key: 'username', label: 'Username' },
-    { key: 'event_type', label: 'Event Type', render: (val) => <span className="tag">{val}</span> },
+    { key: 'source_ip', label: 'Source IP', render: (val) => <span className="font-mono text-xs text-siem-cyan">{val}</span> },
+    { key: 'destination_ip', label: 'Dest IP', render: (val) => <span className="font-mono text-xs text-siem-secondaryText">{val}</span> },
+    { key: 'username', label: 'User', render: (val) => <span className="font-mono text-xs text-white">{val}</span> },
+    { key: 'event_type', label: 'Event Type', render: (val) => <span className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-siem-hover border border-siem-border text-siem-secondaryText">{val}</span> },
     { key: 'severity', label: 'Severity', render: (val) => <SeverityBadge severity={val} /> },
-    { key: 'risk_score', label: 'Risk Score', render: (val) => <span style={getRiskScoreStyle(val)}>{val}</span> },
-    { key: 'label', label: 'Label', render: (val) => <span className="tag">{val}</span> }
+    { key: 'risk_score', label: 'Risk Score', render: (val) => <span className="font-mono text-xs" style={getRiskScoreStyle(val)}>{val}</span> },
+    { key: 'label', label: 'Classification', render: (val) => <span className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-siem-cyan/10 border border-siem-cyan/20 text-siem-cyan">{val}</span> }
   ];
 
   return (
-    <div>
-      <Header title="Event Explorer" subtitle="Search, filter, and investigate security events" />
-      
-      <div className="filter-bar" style={{ display: 'flex', gap: '16px', marginBottom: '24px', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+    <div className="space-y-6">
+      {/* Header */}
+      <header className="flex justify-between items-center">
+        <div>
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl font-display font-semibold text-white flex items-center gap-3"
+          >
+            <span className="w-2.5 h-8 bg-siem-cyan rounded-full animate-pulse shadow-glow-cyan" />
+            Security Event Explorer
+          </motion.h1>
+          <p className="text-xs font-mono text-siem-muted mt-1.5 ml-5">
+            Query, filter, and inspect raw enterprise telemetry logs
+          </p>
+        </div>
+      </header>
+
+      {/* Filter Bar */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-4 flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-siem-muted" />
           <input 
             type="text" 
-            className="data-table-search" 
-            placeholder="Search by IP, username, or event type..." 
+            placeholder="Search by IP, Username, Event Type..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '100%', paddingLeft: '40px' }}
+            className="w-full pl-10 pr-4 py-2 text-xs font-mono bg-siem-bg/60 border border-siem-border rounded-xl text-white placeholder-siem-muted focus:outline-none focus:border-siem-cyan/50 transition-all"
           />
         </div>
-        
-        <select className="filter-select" value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}>
-          <option value="All">All Severities</option>
-          <option value="Critical">Critical</option>
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
-        </select>
 
-        <select className="filter-select" value={eventTypeFilter} onChange={(e) => setEventTypeFilter(e.target.value)}>
-          <option value="All">All Event Types</option>
-          <option value="login_success">login_success</option>
-          <option value="login_failure">login_failure</option>
-          <option value="file_access">file_access</option>
-          <option value="network_connection">network_connection</option>
-          <option value="system_alert">system_alert</option>
-          <option value="privilege_change">privilege_change</option>
-          <option value="data_transfer">data_transfer</option>
-        </select>
+        <div className="flex gap-3 w-full md:w-auto">
+          <select 
+            value={severityFilter} 
+            onChange={(e) => setSeverityFilter(e.target.value)}
+            className="px-3 py-2 text-xs font-mono bg-siem-bg/60 border border-siem-border rounded-xl text-white outline-none focus:border-siem-cyan/50"
+          >
+            <option value="All">All Severities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+
+          <select 
+            value={eventTypeFilter} 
+            onChange={(e) => setEventTypeFilter(e.target.value)}
+            className="px-3 py-2 text-xs font-mono bg-siem-bg/60 border border-siem-border rounded-xl text-white outline-none focus:border-siem-cyan/50"
+          >
+            <option value="All">All Event Types</option>
+            <option value="login_success">login_success</option>
+            <option value="login_failure">login_failure</option>
+            <option value="file_access">file_access</option>
+            <option value="network_connection">network_connection</option>
+            <option value="system_alert">system_alert</option>
+            <option value="privilege_change">privilege_change</option>
+            <option value="data_transfer">data_transfer</option>
+          </select>
+        </div>
+      </motion.div>
+
+      {/* Results Count Banner */}
+      <div className="flex justify-between items-center text-xs font-mono text-siem-muted px-2">
+        <span>Showing <strong className="text-siem-cyan">{filteredEvents.length}</strong> of {events.length} logs</span>
       </div>
 
-      <div style={{ marginBottom: '16px', color: 'var(--text-muted)' }}>
-        Showing {filteredEvents.length} of {events.length} events
-      </div>
-
-      <div className="data-table-container">
+      {/* Data Table */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-panel overflow-hidden">
         {loading ? (
-          <div className="loading">Loading events...</div>
+          <div className="flex items-center justify-center p-16">
+            <RefreshCw className="w-8 h-8 text-siem-cyan animate-spin" />
+          </div>
         ) : (
-          <DataTable data={filteredEvents} columns={columns} />
+          <DataTable data={filteredEvents} columns={columns} searchable={false} />
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

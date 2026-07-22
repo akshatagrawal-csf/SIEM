@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, AlertTriangle, Shield } from 'lucide-react';
 
-const LiveEventFeed = ({ events = [], maxItems = 20 }) => {
+const LiveEventFeed = ({ events = [], maxItems = 15 }) => {
   const [displayEvents, setDisplayEvents] = useState([]);
   const [eventIndex, setEventIndex] = useState(0);
 
   useEffect(() => {
     if (!events || events.length === 0) return;
 
-    // Initialize with first few events if available
     setDisplayEvents(events.slice(0, Math.min(5, events.length)));
     setEventIndex(Math.min(5, events.length));
 
     const interval = setInterval(() => {
       setDisplayEvents(prev => {
         const nextEvent = events[eventIndex % events.length];
-        const newEvent = { ...nextEvent, _id: Date.now() }; // unique id for animation
+        const newEvent = { ...nextEvent, _id: Date.now() };
         const newFeed = [newEvent, ...prev].slice(0, maxItems);
         return newFeed;
       });
@@ -27,11 +26,11 @@ const LiveEventFeed = ({ events = [], maxItems = 20 }) => {
 
   const getSeverityColor = (severity) => {
     switch(severity?.toLowerCase()) {
-      case 'critical': return 'var(--severity-critical)';
-      case 'high': return 'var(--severity-high)';
-      case 'medium': return 'var(--severity-medium)';
-      case 'low': return 'var(--severity-low)';
-      default: return 'var(--text-muted)';
+      case 'critical': return '#FF2255';
+      case 'high': return '#FF7700';
+      case 'medium': return '#FFB800';
+      case 'low': return '#00FF9D';
+      default: return '#71717A';
     }
   };
 
@@ -43,54 +42,37 @@ const LiveEventFeed = ({ events = [], maxItems = 20 }) => {
   };
 
   return (
-    <div className="live-feed glass-card" style={{ padding: '16px', height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <h3 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)', fontSize: '1.1rem' }}>Live Event Feed</h3>
-      <div style={{ overflowY: 'auto', flexGrow: 1, paddingRight: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {displayEvents.map((evt) => (
-          <div 
-            key={evt._id || evt.id || Math.random()} 
-            className="live-feed-item"
-            style={{
-              display: 'flex',
-              gap: '12px',
-              padding: '12px',
-              backgroundColor: 'var(--bg-secondary)',
-              borderRadius: 'var(--radius-md)',
-              borderLeft: `4px solid ${getSeverityColor(evt.severity)}`,
-              animation: 'fadeIn 0.5s ease-out'
-            }}
-          >
-            <div style={{ color: getSeverityColor(evt.severity), marginTop: '2px' }}>
-              {getEventIcon(evt.type)}
+    <div className="flex flex-col gap-2.5 font-mono text-xs">
+      {displayEvents.map((evt) => (
+        <div 
+          key={evt._id || evt.id || Math.random()} 
+          className="flex items-center gap-3 p-3 rounded-xl bg-siem-bg/70 border border-siem-border hover:border-siem-cyan/30 transition-all"
+          style={{ borderLeft: `3px solid ${getSeverityColor(evt.severity)}` }}
+        >
+          <div style={{ color: getSeverityColor(evt.severity) }} className="shrink-0">
+            {getEventIcon(evt.event_type || evt.type)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-center mb-0.5">
+              <span className="font-bold text-white tracking-wide truncate">{evt.event_type || evt.type || 'Unknown Event'}</span>
+              <span className="text-[10px] text-siem-muted shrink-0 ml-2">
+                {evt.timestamp ? new Date(evt.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()}
+              </span>
             </div>
-            <div className="feed-content" style={{ flexGrow: 1, fontSize: '0.9rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span className="feed-type" style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{evt.type || 'Unknown Event'}</span>
-                <span className="feed-time" style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                  {evt.timestamp ? new Date(evt.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()}
-                </span>
-              </div>
-              <div className="feed-detail" style={{ color: 'var(--text-secondary)' }}>
-                {evt.source_ip && evt.dest_ip ? (
-                  <span>{evt.source_ip} &rarr; {evt.dest_ip}</span>
-                ) : (
-                  <span>{evt.description || 'System event recorded'}</span>
-                )}
-                {evt.username && <span style={{ marginLeft: '8px', color: 'var(--accent-primary)' }}>@{evt.username}</span>}
-              </div>
+            <div className="text-[11px] text-siem-secondaryText truncate">
+              {evt.source_ip && (evt.destination_ip || evt.dest_ip) ? (
+                <span><strong className="text-siem-cyan">{evt.source_ip}</strong> &rarr; {evt.destination_ip || evt.dest_ip}</span>
+              ) : (
+                <span>{evt.description || 'Telemetry anomaly logged'}</span>
+              )}
+              {evt.username && <span className="ml-2 text-siem-cyan font-semibold">@{evt.username}</span>}
             </div>
           </div>
-        ))}
-        {displayEvents.length === 0 && (
-          <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>Waiting for events...</div>
-        )}
-      </div>
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+        </div>
+      ))}
+      {displayEvents.length === 0 && (
+        <div className="text-siem-muted text-center p-8">Listening for security telemetry events...</div>
+      )}
     </div>
   );
 };
