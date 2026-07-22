@@ -28,7 +28,8 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-siem-card border border-siem-border rounded-lg shadow-card transition-colors duration-150;
+    @apply bg-siem-card border border-siem-border rounded-lg transition-colors duration-150;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
   }
   
   .glass-panel-hover {
@@ -139,7 +140,7 @@ body {
   @apply rounded-lg overflow-hidden;
 }
 .react-flow__controls {
-  @apply bg-siem-card border border-siem-border rounded-md shadow-card overflow-hidden !important;
+  @apply bg-siem-card border border-siem-border rounded-md overflow-hidden !important;
 }
 .react-flow__controls-button {
   @apply bg-transparent border-b border-siem-border text-siem-text hover:bg-siem-hover fill-current !important;
