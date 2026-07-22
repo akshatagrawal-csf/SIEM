@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as mockData from '../data/mockData';
 
 const API_BASE = 'http://localhost:8000/api';
-const USE_MOCK = true; // Toggle when backend is ready
+const USE_MOCK = false; // Toggle when backend is ready
 
 const apiClient = axios.create({ baseURL: API_BASE, timeout: 5000 });
 

@@ -5,43 +5,34 @@ export default {
     extend: {
       colors: {
         siem: {
-          bg: '#000000',
-          secondary: '#080808',
-          card: 'rgba(18, 18, 18, 0.85)',
-          border: 'rgba(255, 255, 255, 0.1)',
-          hover: 'rgba(255, 255, 255, 0.07)',
-          gold: '#FFB800',       /* Cyber Gold / Amber */
-          cyan: '#FFB800',       /* Alias to Gold for zero blue */
-          emerald: '#00FF9D',    /* Neon Emerald */
-          blue: '#00FF9D',       /* Alias to Emerald */
-          purple: '#00FF9D',     /* Alias to Emerald */
-          green: '#00FF9D',      /* Neon Emerald */
-          orange: '#FF7700',     /* Cyber Orange */
-          critical: '#FF2255',   /* Neon Crimson Red */
-          high: '#FF7700',       /* Cyber Orange */
-          medium: '#FFB800',     /* Cyber Gold */
-          low: '#00FF9D',        /* Neon Emerald */
-          text: '#FFFFFF',
-          secondaryText: '#A1A1AA',
-          muted: '#71717A',
+          bg: '#0B0C10',
+          secondary: '#0F1017',
+          card: '#13141C',
+          border: '#1E202E',
+          hover: '#1B1D2A',
+          cyan: '#3B82F6',       /* Enterprise Blue Accent */
+          emerald: '#10B981',    /* Enterprise Emerald */
+          purple: '#6366F1',     /* Enterprise Indigo */
+          green: '#10B981',      /* Success Green */
+          orange: '#F97316',     /* High Risk Orange */
+          critical: '#EF4444',   /* Critical Red */
+          high: '#F97316',       /* High Orange */
+          medium: '#F59E0B',     /* Medium Amber */
+          low: '#10B981',        /* Low Green */
+          text: '#F9FAFB',
+          secondaryText: '#9CA3AF',
+          muted: '#6B7280',
         }
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        display: ['Space Grotesk', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
         mono: ['Fira Code', 'monospace'],
       },
       boxShadow: {
-        'glow-cyan': '0 0 25px rgba(255, 184, 0, 0.35)',
-        'glow-gold': '0 0 25px rgba(255, 184, 0, 0.35)',
-        'glow-critical': '0 0 25px rgba(255, 34, 85, 0.4)',
-        'glow-emerald': '0 0 25px rgba(0, 255, 157, 0.35)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.85)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2)',
+        'panel': '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3)',
       },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'spin-slow': 'spin 20s linear infinite',
-      }
     },
   },
   plugins: [],

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldAlert, Activity, Network, Globe, Shield, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Activity, Globe, Shield, RefreshCw } from 'lucide-react';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip as RechartsTooltip
@@ -26,10 +26,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const SEVERITY_COLORS = {
-  Critical: '#FF2255',
-  High: '#FF7700',
-  Medium: '#FFB800',
-  Low: '#00FF9D'
+  Critical: '#EF4444',
+  High: '#F97316',
+  Medium: '#F59E0B',
+  Low: '#10B981'
 };
 
 export default function Dashboard() {
@@ -70,137 +70,130 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <RefreshCw className="w-8 h-8 text-siem-cyan animate-spin" />
+        <RefreshCw className="w-6 h-6 text-siem-cyan animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <header className="flex items-center justify-between">
         <div>
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-3xl font-display font-semibold text-white flex items-center gap-3"
-          >
-            <span className="w-2.5 h-8 bg-siem-cyan rounded-full animate-pulse shadow-glow-cyan" />
+          <h1 className="text-2xl font-semibold text-white tracking-tight">
             Global Threat Landscape
-          </motion.h1>
-          <p className="text-xs font-mono text-siem-muted mt-1.5 ml-5">
-            Real-time SIEM security operations center overview
+          </h1>
+          <p className="text-xs text-siem-muted mt-1">
+            Real-time Security Operations Center Overview
           </p>
         </div>
       </header>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { title: "Total Events Ingested", value: totalEvents.toLocaleString(), icon: Activity, color: "text-siem-cyan", bg: "from-siem-cyan/20 to-transparent", change: "+12.5%" },
-          { title: "Critical Anomalies", value: criticalIncidents.toLocaleString(), icon: ShieldAlert, color: "text-siem-critical", bg: "from-siem-critical/20 to-transparent", change: "-3.2%" },
-          { title: "Hostile IP Sources", value: uniqueMaliciousIps.toLocaleString(), icon: Globe, color: "text-siem-high", bg: "from-siem-high/20 to-transparent", change: "+8.1%" },
-          { title: "ML Model Detections", value: mlDetections.toLocaleString(), icon: Shield, color: "text-siem-purple", bg: "from-siem-purple/20 to-transparent", change: "+15.3%" }
+          { title: "Total Events Ingested", value: totalEvents.toLocaleString(), icon: Activity, color: "text-blue-500", change: "+12.5%" },
+          { title: "Critical Anomalies", value: criticalIncidents.toLocaleString(), icon: ShieldAlert, color: "text-red-500", change: "-3.2%" },
+          { title: "Hostile IP Sources", value: uniqueMaliciousIps.toLocaleString(), icon: Globe, color: "text-amber-500", change: "+8.1%" },
+          { title: "ML Model Detections", value: mlDetections.toLocaleString(), icon: Shield, color: "text-indigo-500", change: "+15.3%" }
         ].map((kpi, i) => (
-          <motion.div
+          <div
             key={i}
-            whileHover={{ y: -4, scale: 1.01 }}
-            className="glass-panel glass-panel-hover p-6 rounded-2xl relative overflow-hidden group border border-siem-border"
+            className="glass-panel p-5 rounded-lg border border-siem-border bg-siem-card"
           >
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${kpi.bg} blur-2xl opacity-50 group-hover:opacity-100 transition-opacity`} />
-            <div className="flex justify-between items-start relative z-10">
+            <div className="flex justify-between items-start">
               <div>
-                <p className="text-siem-muted text-xs font-mono tracking-wider uppercase">{kpi.title}</p>
-                <h3 className="text-3xl font-display font-bold text-white mt-2">{kpi.value}</h3>
-                <span className="text-[11px] font-mono text-siem-green mt-1 inline-block">{kpi.change} vs last cycle</span>
+                <p className="text-siem-muted text-xs font-medium tracking-wide uppercase">{kpi.title}</p>
+                <h3 className="text-2xl font-bold text-white mt-1.5">{kpi.value}</h3>
+                <span className="text-[11px] text-emerald-500 font-medium mt-1 inline-block">{kpi.change} vs last cycle</span>
               </div>
-              <div className="p-3 rounded-xl bg-siem-bg/50 border border-siem-border">
-                <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
+              <div className="p-2.5 rounded-md bg-siem-secondary border border-siem-border">
+                <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Middle Grid: Severity Donut Chart & Live Event Stream */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Severity Distribution */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-6">
-          <div className="flex justify-between items-center mb-6">
+        <div className="glass-panel p-6">
+          <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="font-display font-semibold text-lg text-white">Event Severity Breakdown</h3>
-              <p className="text-xs font-mono text-siem-muted">Categorized risk classification</p>
+              <h3 className="font-semibold text-base text-white">Event Severity Breakdown</h3>
+              <p className="text-xs text-siem-muted">Categorized risk classification</p>
             </div>
           </div>
-          <div className="h-72 relative">
+          <div className="h-64 relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={severityData}
-                  innerRadius={75}
-                  outerRadius={115}
-                  paddingAngle={4}
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={3}
                   dataKey="value"
                 >
                   {severityData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={SEVERITY_COLORS[entry.name] || '#71717A'} stroke="rgba(0,0,0,0.8)" />
+                    <Cell key={`cell-${index}`} fill={SEVERITY_COLORS[entry.name] || '#6B7280'} stroke="#13141C" />
                   ))}
                 </Pie>
                 <RechartsTooltip content={<CustomTooltip />} />
-                <text x="50%" y="46%" textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" className="font-display font-bold text-2xl">
+                <text x="50%" y="46%" textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" className="font-bold text-2xl">
                   {totalEvents}
                 </text>
-                <text x="50%" y="56%" textAnchor="middle" dominantBaseline="middle" fill="#A1A1AA" className="font-mono text-xs">
+                <text x="50%" y="56%" textAnchor="middle" dominantBaseline="middle" fill="#9CA3AF" className="text-xs font-mono">
                   EVENTS
                 </text>
               </PieChart>
             </ResponsiveContainer>
           </div>
-        </motion.div>
+        </div>
 
         {/* Live Security Feed */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-panel p-6 flex flex-col">
+        <div className="glass-panel p-6 flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="font-display font-semibold text-lg text-white">Live Event Feed</h3>
-              <p className="text-xs font-mono text-siem-muted">Real-time incoming telemetry stream</p>
+              <h3 className="font-semibold text-base text-white">Live Security Stream</h3>
+              <p className="text-xs text-siem-muted">Real-time incoming telemetry log</p>
             </div>
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono bg-siem-cyan/10 text-siem-cyan border border-siem-cyan/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-siem-cyan animate-ping" /> REALTIME
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              REALTIME
             </span>
           </div>
-          <div className="flex-1 max-h-[290px] overflow-y-auto custom-scrollbar">
+          <div className="flex-1 max-h-[260px] overflow-y-auto custom-scrollbar">
             <LiveEventFeed events={events.slice(0, 12)} />
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Security Events Timeline Chart */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-panel p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="glass-panel p-6">
+        <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="font-display font-semibold text-lg text-white">Security Events Timeline</h3>
-            <p className="text-xs font-mono text-siem-muted">30-day aggregate threat velocity trend</p>
+            <h3 className="font-semibold text-base text-white">Security Events Timeline</h3>
+            <p className="text-xs text-siem-muted">30-day aggregate threat velocity trend</p>
           </div>
         </div>
-        <div className="h-80">
+        <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timelineData}>
               <defs>
                 <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FFB800" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#FFB800" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis dataKey="time" stroke="#71717A" tickLine={false} axisLine={false} className="font-mono text-xs" />
-              <YAxis stroke="#71717A" tickLine={false} axisLine={false} className="font-mono text-xs" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1E202E" vertical={false} />
+              <XAxis dataKey="time" stroke="#6B7280" tickLine={false} axisLine={false} className="text-xs" />
+              <YAxis stroke="#6B7280" tickLine={false} axisLine={false} className="text-xs" />
               <RechartsTooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="count" stroke="#FFB800" strokeWidth={2} fillOpacity={1} fill="url(#colorCount)" />
+              <Area type="monotone" dataKey="count" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#colorCount)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
