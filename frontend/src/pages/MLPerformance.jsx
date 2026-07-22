@@ -121,12 +121,12 @@ export default function MLPerformance() {
           { title: "Evaluated Training Samples", value: "10,000", icon: BarChart2, color: "text-amber-400" }
         ].map((kpi, i) => (
           <div key={i} className="glass-panel p-5 rounded-lg border border-siem-border bg-siem-card">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-siem-muted text-xs font-medium uppercase tracking-wide">{kpi.title}</p>
-                <h3 className="text-2xl font-bold text-white mt-1.5">{kpi.value}</h3>
+            <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0 flex-1 pr-1">
+                <p className="text-siem-muted text-[11px] font-mono font-medium uppercase tracking-wide truncate" title={kpi.title}>{kpi.title}</p>
+                <h3 className="font-bold text-white mt-1.5 tracking-tight break-all truncate text-lg sm:text-xl lg:text-2xl" title={kpi.value}>{kpi.value}</h3>
               </div>
-              <div className="p-2.5 rounded-md bg-siem-secondary border border-siem-border">
+              <div className="p-2.5 rounded-md bg-siem-secondary border border-siem-border shrink-0">
                 <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
               </div>
             </div>
