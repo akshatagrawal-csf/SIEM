@@ -6,8 +6,14 @@ Registers all route modules and initializes the database on startup.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import sys
 import os
 import logging
+
+# Ensure backend root is in sys.path when imported as backend.app.main:app
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 
 from app.database import init_db
 
