@@ -15,7 +15,10 @@ import os
 USE_SQLITE = True
 
 if USE_SQLITE:
-    db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "siem.db")
+    if os.environ.get("VERCEL"):
+        db_path = "/tmp/siem.db"
+    else:
+        db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "siem.db")
     DATABASE_URL = f"sqlite+aiosqlite:///{db_path}"
     engine = create_async_engine(
         DATABASE_URL,
