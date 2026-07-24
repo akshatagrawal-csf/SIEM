@@ -13,15 +13,18 @@ from app.schemas import (
     MLPredictionResponse,
     MLPerformanceResponse,
     FeatureImportanceItem,
+    ConfusionMatrixResponse,
 )
 from app.services.ml_service import (
     predict_event,
     get_model_metrics,
     get_feature_importances,
+    get_confusion_matrix,
 )
 from app.services.risk_scoring import calculate_risk_score
 
 router = APIRouter()
+
 
 
 @router.post(
@@ -72,3 +75,18 @@ async def get_performance():
 )
 async def get_feature_importance():
     return get_feature_importances()
+
+
+@router.get(
+    "/confusion-matrix",
+    response_model=ConfusionMatrixResponse,
+    summary="Get model confusion matrix",
+    description="Returns multiclass classification confusion matrix across attack types.",
+)
+async def get_ml_confusion_matrix():
+    data = get_confusion_matrix()
+    return ConfusionMatrixResponse(
+        labels=data["labels"],
+        matrix=data["matrix"],
+    )
+

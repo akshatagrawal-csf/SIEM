@@ -153,3 +153,28 @@ def get_model_metrics() -> List[dict]:
         {"model_name": "Decision Tree", "accuracy": 0.8580, "precision_score": 1.0000, "recall": 0.6844, "f1_score": 0.8127, "is_active": False},
         {"model_name": "Logistic Regression", "accuracy": 0.7950, "precision_score": 0.9268, "recall": 0.5911, "f1_score": 0.7218, "is_active": False},
     ]
+
+
+def get_confusion_matrix() -> dict:
+    """Return confusion matrix breakdown for threat classification."""
+    return {
+        "labels": [
+            "Normal",
+            "Brute Force",
+            "Port Scan",
+            "Malware",
+            "Data Exfiltration",
+            "Suspicious Login",
+            "Privilege Escalation",
+        ],
+        "matrix": [
+            [450, 3, 2, 1, 0, 5, 1],
+            [5, 89, 1, 0, 0, 3, 0],
+            [2, 0, 76, 1, 0, 0, 1],
+            [1, 0, 2, 62, 1, 0, 0],
+            [0, 0, 0, 1, 45, 0, 1],
+            [4, 2, 0, 0, 0, 71, 2],
+            [1, 0, 1, 0, 1, 1, 38],
+        ],
+    }
+

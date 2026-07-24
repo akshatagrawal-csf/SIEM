@@ -10,15 +10,104 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import math
 
 from app.database import get_db
 from app.models import SecurityEvent
-from app.schemas import SecurityEventResponse, EventListResponse, EventStatsResponse
+from app.schemas import SecurityEventResponse, EventListResponse, EventStatsResponse, SecurityEventCreate
 from app.auth import get_current_user
+from app.services.rule_engine import evaluate_event
+from app.services.ml_service import predict_event
+from app.services.risk_scoring import calculate_risk_score
 
 router = APIRouter()
+
+
+@router.post(
+    "",
+    response_model=SecurityEventResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Ingest new security event",
+    description="Accepts security event payload, evaluates detection rules, runs ML prediction model, calculates risk score, and saves to database.",
+)
+async def create_event(
+    event_data: SecurityEventCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    event_dict = event_data.model_dump()
+    if not event_dict.get("timestamp"):
+        event_dict["timestamp"] = datetime.now(timezone.utc)
+
+    # 1. Rule Engine Evaluation
+    triggered_rules = evaluate_event(event_dict)
+    rule_triggered = None
+    rule_severity = None
+    rule_recommendation = None
+    if triggered_rules:
+        rule_triggered = ", ".join([r["name"] for r in triggered_rules])
+        sevs = [r.get("severity", "Low") for r in triggered_rules]
+        if "Critical" in sevs:
+            rule_severity = "Critical"
+        elif "High" in sevs:
+            rule_severity = "High"
+        elif "Medium" in sevs:
+            rule_severity = "Medium"
+        else:
+            rule_severity = "Low"
+        rule_recommendation = f"Investigate triggered rules: {rule_triggered}"
+
+
+    # 2. ML Prediction
+    ml_result = predict_event(event_dict)
+    ml_pred = ml_result.get("prediction", "normal")
+    ml_conf = ml_result.get("confidence", 0.5)
+
+    # 3. Composite Risk Score Calculation
+    calculated_risk = calculate_risk_score(
+        event_dict,
+        ml_prediction=ml_pred,
+        ml_confidence=ml_conf,
+    )
+
+    # 4. Construct SecurityEvent ORM Instance
+    new_event = SecurityEvent(
+        timestamp=event_dict["timestamp"],
+        source_ip=event_dict["source_ip"],
+        destination_ip=event_dict.get("destination_ip"),
+        username=event_dict.get("username"),
+        event_type=event_dict["event_type"],
+        login_status=event_dict.get("login_status"),
+        failed_attempts=event_dict.get("failed_attempts", 0),
+        destination_port=event_dict.get("destination_port"),
+        protocol=event_dict.get("protocol"),
+        bytes_transferred=event_dict.get("bytes_transferred", 0),
+        device_type=event_dict.get("device_type"),
+        country=event_dict.get("country"),
+        alert_type=event_dict.get("alert_type"),
+        severity=event_dict.get("severity") or rule_severity or "Low",
+        label=event_dict.get("label") or ("Malicious" if ml_pred == "malicious" else "Normal"),
+        risk_score=calculated_risk,
+        ml_prediction=ml_pred,
+        ml_confidence=ml_conf,
+        rule_triggered=rule_triggered,
+        recommendation=rule_recommendation,
+        escalation=bool(calculated_risk >= 70.0),
+    )
+
+    try:
+        db.add(new_event)
+        await db.commit()
+        await db.refresh(new_event)
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to ingest security event: {str(e)}",
+        )
+
+    return SecurityEventResponse.model_validate(new_event)
+
 
 
 @router.get(

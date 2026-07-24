@@ -14,6 +14,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.models import SecurityEvent
+from app.schemas import PortTargetItem
 
 router = APIRouter()
 
@@ -23,6 +24,26 @@ SEVERITY_COLORS = {
     "Medium": "#FFB800",
     "Low": "#00FF9D",
 }
+
+COMMON_PORT_NAMES = {
+    21: "FTP",
+    22: "SSH",
+    23: "Telnet",
+    25: "SMTP",
+    53: "DNS",
+    80: "HTTP",
+    110: "POP3",
+    143: "IMAP",
+    443: "HTTPS",
+    445: "SMB",
+    1433: "MSSQL",
+    1521: "Oracle",
+    3306: "MySQL",
+    3389: "RDP",
+    5432: "PostgreSQL",
+    8080: "HTTP-Proxy",
+}
+
 
 
 @router.get(
@@ -148,3 +169,36 @@ async def threats_timeline(
         }
         for row in rows
     ]
+
+
+@router.get(
+    "/top-ports",
+    response_model=list[PortTargetItem],
+    summary="Top targeted ports",
+    description="Returns the top N destination ports targeted by security events.",
+)
+async def threats_top_ports(
+    limit: int = Query(10, ge=1, le=50, description="Number of top ports to return"),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(
+            SecurityEvent.destination_port,
+            func.count(SecurityEvent.id).label("count"),
+        )
+        .where(SecurityEvent.destination_port.isnot(None))
+        .group_by(SecurityEvent.destination_port)
+        .order_by(func.count(SecurityEvent.id).desc())
+        .limit(limit)
+    )
+    rows = result.all()
+
+    return [
+        PortTargetItem(
+            port=row.destination_port,
+            count=row.count,
+            service=COMMON_PORT_NAMES.get(row.destination_port, "Unknown"),
+        )
+        for row in rows
+    ]
+

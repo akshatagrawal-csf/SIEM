@@ -48,6 +48,25 @@ class UserResponse(BaseModel):
 # SECURITY EVENT Schemas
 # ═══════════════════════════════════════════
 
+class SecurityEventCreate(BaseModel):
+    """POST /api/events — request body for event ingestion."""
+    timestamp: Optional[datetime] = None
+    source_ip: str = Field(..., examples=["192.168.1.100"])
+    destination_ip: Optional[str] = Field(None, examples=["10.0.0.5"])
+    username: Optional[str] = Field(None, examples=["john.doe"])
+    event_type: str = Field(..., examples=["login_failure"])
+    login_status: Optional[str] = Field(None, examples=["failed"])
+    failed_attempts: int = Field(0, ge=0)
+    destination_port: Optional[int] = Field(None, ge=1, le=65535)
+    protocol: Optional[str] = Field(None, examples=["TCP"])
+    bytes_transferred: int = Field(0, ge=0)
+    device_type: Optional[str] = Field(None, examples=["workstation"])
+    country: Optional[str] = Field(None, examples=["US"])
+    alert_type: Optional[str] = Field(None, examples=["Authentication"])
+    severity: Optional[str] = Field(None, examples=["High"])
+    label: Optional[str] = Field(None, examples=["Brute Force"])
+
+
 class SecurityEventResponse(BaseModel):
     """Single security event — used in list responses and detail views."""
     id: int
@@ -130,6 +149,13 @@ class TimelineItem(BaseModel):
     low: int = 0
 
 
+class PortTargetItem(BaseModel):
+    """Single item in top targeted ports."""
+    port: int
+    count: int
+    service: Optional[str] = None
+
+
 # ═══════════════════════════════════════════
 # ATTACK CHAIN Schemas
 # ═══════════════════════════════════════════
@@ -169,6 +195,11 @@ class AttackChainListResponse(BaseModel):
     total: int
 
 
+class AttackChainStatusUpdate(BaseModel):
+    """PATCH /api/attack-chains/{id}/status — request body."""
+    status: str = Field(..., examples=["contained"], description="Status: active, contained, resolved")
+
+
 # ═══════════════════════════════════════════
 # COMPLIANCE Schemas
 # ═══════════════════════════════════════════
@@ -197,6 +228,11 @@ class ComplianceSummaryResponse(BaseModel):
     by_type: dict
 
 
+class ComplianceStatusUpdate(BaseModel):
+    """PATCH /api/compliance/violations/{id} — request body."""
+    status: str = Field(..., examples=["investigating"], description="Status: open, investigating, resolved")
+
+
 # ═══════════════════════════════════════════
 # RECOMMENDATION Schemas
 # ═══════════════════════════════════════════
@@ -217,6 +253,23 @@ class RecommendationResponse(BaseModel):
     status: str = "pending"
 
     model_config = {"from_attributes": True}
+
+
+class RecommendationStatusUpdate(BaseModel):
+    """PATCH /api/recommendations/{id} — request body."""
+    status: str = Field(..., examples=["in_progress"], description="Status: pending, in_progress, completed, dismissed")
+
+
+# ═══════════════════════════════════════════
+# RISK SCORING Schemas
+# ═══════════════════════════════════════════
+
+class RiskScoreSummaryResponse(BaseModel):
+    """GET /api/risk-scores/summary — aggregate risk stats."""
+    average_risk_score: float
+    max_risk_score: float
+    high_risk_count: int
+    total_scored_events: int
 
 
 # ═══════════════════════════════════════════
@@ -266,3 +319,10 @@ class FeatureImportanceItem(BaseModel):
     """Single feature importance entry."""
     feature: str
     importance: float
+
+
+class ConfusionMatrixResponse(BaseModel):
+    """GET /api/ml/confusion-matrix — response."""
+    labels: List[str]
+    matrix: List[List[int]]
+
