@@ -16,6 +16,7 @@ if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
 from app.database import init_db
+from app.services.ml_service import load_models
 
 # Configure logging
 logging.basicConfig(
@@ -32,6 +33,8 @@ async def lifespan(app: FastAPI):
     logger.info("SIEM Analytics API starting up...")
     await init_db()
     logger.info("[OK] Database tables verified/created")
+    load_models()
+    logger.info("[OK] ML models loaded into memory")
     logger.info("[OK] API ready at http://0.0.0.0:8000/docs")
     yield
     logger.info("SIEM Analytics API shutting down...")

@@ -11,8 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.orm import DeclarativeBase
 import os
 
-# ─── Toggle: set True to use local SQLite, False for PostgreSQL ───
-USE_SQLITE = True
+# ─── Toggle: controlled via Settings.USE_SQLITE (env var USE_SQLITE=true/false) ───
+from app.config import get_settings
+
+settings = get_settings()
+USE_SQLITE = settings.USE_SQLITE
 
 if USE_SQLITE:
     if os.environ.get("VERCEL"):
@@ -26,8 +29,6 @@ if USE_SQLITE:
         connect_args={"check_same_thread": False},
     )
 else:
-    from app.config import get_settings
-    settings = get_settings()
     DATABASE_URL = settings.DATABASE_URL
     engine = create_async_engine(
         DATABASE_URL,

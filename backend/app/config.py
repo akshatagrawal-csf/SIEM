@@ -5,10 +5,16 @@ Uses Pydantic Settings to load environment variables from .env file.
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 import os
+import logging
+
+logger = logging.getLogger("siem.config")
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
+    # Database Mode Toggle (True = SQLite for dev/Vercel, False = PostgreSQL)
+    USE_SQLITE: bool = True
 
     # PostgreSQL Database
     POSTGRES_USER: str = "siem_admin"
@@ -63,4 +69,8 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     """Cached settings singleton. Call this to access configuration."""
-    return Settings()
+    s = Settings()
+    if s.JWT_SECRET == "your-super-secret-jwt-key-change-in-production" and not s.DEBUG:
+        logger.warning("[SECURITY WARN] Using default insecure JWT_SECRET in non-debug environment!")
+    return s
+
